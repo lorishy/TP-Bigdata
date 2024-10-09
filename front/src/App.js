@@ -2,7 +2,7 @@
 import React from 'react';
 import './App.css';
 import Home from './Components/Home';
-import Chatbot from './Components/Chatbot';
+import MessageChecker from './Components/MessageChecker';
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
       </header>
       <main className="main-content">
         <Home />
-        <Chatbot />
+        <MessageChecker />
       </main>
       <footer className="footer">
         <p>&copy; 2024 IPSSI. Tous droits réservés.</p>
