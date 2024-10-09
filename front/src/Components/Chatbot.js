@@ -8,33 +8,39 @@ const Chatbot = () => {
   ]);
   const [input, setInput] = useState('');
 
-  const handleSend = () => {
+  // Fonction pour envoyer le message à l'API Flask
+  const sendMessageToFlask = async (message) => {
+    try {
+      const response = await fetch('http://localhost:5550/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+      const data = await response.json();
+      return data.message; // Retourne la réponse du serveur Flask
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message à Flask:', error);
+      return 'Désolé, une erreur s\'est produite. Veuillez réessayer plus tard.'; // Message en cas d'erreur
+    }
+  };
+
+  const handleSend = async () => {
     if (input.trim() === '') return;
 
     const userMessage = { sender: 'user', text: input };
     setMessages([...messages, userMessage]);
     setInput('');
 
-    // Simuler une réponse du bot après 1 seconde
-    setTimeout(() => {
-      const botResponse = {
-        sender: 'bot',
-        text: getBotResponse(input),
-      };
-      setMessages((prevMessages) => [...prevMessages, botResponse]);
-    }, 1000);
-  };
+    // Envoyer le message au serveur Flask et obtenir la réponse
+    const botResponseText = await sendMessageToFlask(input);
 
-  const getBotResponse = (inputText) => {
-    // Logique simple pour simuler des réponses
-    const responses = [
-      'Je suis là pour vous aider !',
-      'Pouvez-vous préciser votre demande ?',
-      'Merci de votre message. Nous reviendrons vers vous sous peu.',
-      'C\'est intéressant ! Dites-m\'en plus.',
-      'Je ne suis pas sûr de comprendre. Pouvez-vous reformuler ?',
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    const botResponse = {
+      sender: 'bot',
+      text: botResponseText,
+    };
+    setMessages((prevMessages) => [...prevMessages, botResponse]);
   };
 
   const handleKeyPress = (e) => {
