@@ -8,23 +8,6 @@ const Chatbot = () => {
   ]);
   const [input, setInput] = useState('');
 
-  // Fonction pour envoyer le message à l'API Flask
-  const sendMessageToFlask = async (message) => {
-    try {
-      const response = await fetch('http://localhost:5550/message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message }),
-      });
-      const data = await response.json();
-      return data.message; // Retourne la réponse du serveur Flask
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi du message à Flask:', error);
-      return 'Désolé, une erreur s\'est produite. Veuillez réessayer plus tard.'; // Message en cas d'erreur
-    }
-  };
 
   const handleSend = async () => {
     if (input.trim() === '') return;
@@ -33,14 +16,7 @@ const Chatbot = () => {
     setMessages([...messages, userMessage]);
     setInput('');
 
-    // Envoyer le message au serveur Flask et obtenir la réponse
-    const botResponseText = await sendMessageToFlask(input);
-
-    const botResponse = {
-      sender: 'bot',
-      text: botResponseText,
-    };
-    setMessages((prevMessages) => [...prevMessages, botResponse]);
+    setMessages((prevMessages) => [...prevMessages]);
   };
 
   const handleKeyPress = (e) => {

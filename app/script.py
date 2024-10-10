@@ -7,8 +7,6 @@ spark = SparkSession.builder \
 
 # Lecture du fichier csv
 df = spark.read.text("hdfs://namenode:9000/Datasets/train.csv")
-
-#************************* Exercice 2 et Exercice 3 ****************
  
 #1/ voir les premiers lignes de donnees
 df.show(5)

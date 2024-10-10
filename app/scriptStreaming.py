@@ -19,6 +19,7 @@ df = spark \
   .format("kafka") \
   .option("kafka.bootstrap.servers", kafka_bootstrap_servers) \
   .option("subscribe", kafka_topic_name) \
+  .option("failOnDataLoss", "false") \
   .load()
  
 # Caster les data de mon string pour les rendre utilisables
