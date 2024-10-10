@@ -17,6 +17,9 @@ producer = KafkaProducer(
 class MessageSchema(Schema):
     message = fields.Str(required=True)
 
+# Créer une instance du schéma
+message_schema = MessageSchema()
+
 # Selectionner mon topic
 kafka_topic_name = "topic1"
  
@@ -34,7 +37,7 @@ def add_message():
     except ValidationError as err:
         return jsonify(err.messages), 422
 
-    producer.send('topic1', data)
+    producer.send(kafka_topic_name, data)
     producer.flush()
 
     return jsonify({"message": "User data received and sent to Kafka"}), 200

@@ -41,7 +41,7 @@ tokenizer = Tokenizer(inputCol="message", outputCol="words")
 tokenized_df = tokenizer.transform(parsed_df)
 
 # Charger le modèle CountVectorizer pré-entraîné
-vectorizer_model = CountVectorizerModel.load("hdfs://namenode:9000/user/vec/vec")
+vectorizer_model = CountVectorizerModel.load("hdfs://namenode:9000/user/vec")
 
 # **Étape 2: Utiliser le modèle de vectorisation pré-entraîné**
 vectorized_df = vectorizer_model.transform(tokenized_df)
