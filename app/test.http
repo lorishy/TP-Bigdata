@@ -1,0 +1,6 @@
+POST http://localhost:5550/message
+Content-Type: application/json
+
+{
+  "message": "cocksucker piss work"
+}
