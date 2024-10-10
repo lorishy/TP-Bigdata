@@ -4,6 +4,7 @@ from marshmallow import Schema, fields, ValidationError
 import json
 from flask_cors import CORS
 
+
 app = Flask(__name__)
 CORS(app)
 
@@ -16,7 +17,11 @@ producer = KafkaProducer(
 class MessageSchema(Schema):
     message = fields.Str(required=True)
 
-message_schema = MessageSchema()
+# Selectionner mon topic
+kafka_topic_name = "topic1"
+ 
+# Selectionner mon server
+kafka_bootstrap_servers = 'kafka:9092'
 
 @app.route('/message', methods=['POST'])
 def add_message():
@@ -33,6 +38,7 @@ def add_message():
     producer.flush()
 
     return jsonify({"message": "User data received and sent to Kafka"}), 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5550)

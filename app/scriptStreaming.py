@@ -1,46 +1,49 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import expr
- 
-# Creer la session Spark
-spark = SparkSession.builder.appName("StocksToHDFS").getOrCreate()
- 
-# Mute les logs inferieur au niveau Warning
+from pyspark.sql.functions import from_json, col
+from pyspark.sql.types import StructType, StringType
+from pyspark.ml.classification import LogisticRegressionModel
+
+# Créer la session Spark
+spark = SparkSession.builder \
+    .appName("KafkaSparkMLTest") \
+    .getOrCreate()
+
+model_path = "hdfs://namenode:9000/user/model" 
+model = LogisticRegressionModel.load(model_path)
+
+# Mute les logs inférieur au niveau Warning
 spark.sparkContext.setLogLevel("WARN")
- 
-# Selectionner mon topic
+
+# Nom du topic Kafka et serveur Kafka
 kafka_topic_name = "topic1"
- 
-# Selectionner mon server
 kafka_bootstrap_servers = 'kafka:9092'
- 
-# Recuperation de mes data de mon stream kafka
-df = spark \
+
+# Récupération des données du flux Kafka
+kafka_stream = spark \
   .readStream \
   .format("kafka") \
   .option("kafka.bootstrap.servers", kafka_bootstrap_servers) \
   .option("subscribe", kafka_topic_name) \
   .option("failOnDataLoss", "false") \
   .load()
- 
-# Caster les data de mon string pour les rendre utilisables
-df = df.selectExpr("CAST(value AS STRING)")
- 
- 
-query = df \
-    .writeStream.outputMode("append") \
+
+# Schéma des données Kafka (extraction du champ "comment" du message JSON)
+schema = StructType().add("comment", StringType())
+
+# Extraire le contenu des messages Kafka (le champ "value" contient les messages)
+value_df = kafka_stream.selectExpr("CAST(value AS STRING)")
+
+# Parser les messages en JSON pour récupérer le champ "comment"
+parsed_df = value_df.withColumn("data", from_json(col("value"), schema)).select("data.*")
+
+# Appliquer le modèle de machine learning sur les données des commentaires
+predictions = model.transform(parsed_df)
+
+# Afficher les prédictions dans la console
+query = predictions.select("comment", "prediction").writeStream \
+    .outputMode("append") \
     .format("console") \
     .start()
- 
-# Sauvegarder les data dans un fichier
- 
-query = df \
-    .writeStream \
-  .format("text") \
-  .outputMode("append") \
-  .option("path", "hdfs://namenode:9000/Data/stocks") \
-  .option("checkpointLocation", "hdfs://namenode:9000/Data/stocks/checkpoint") \
-  .start()
- 
- 
-# Ne pas terminer le fichier tant que mon stream n'est pas finit
+
+# Ne pas terminer le fichier tant que le streaming n'est pas fini
 query.awaitTermination()
